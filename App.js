@@ -63,7 +63,10 @@ export default function App() {
     if (text === "") {
       return;
     }
-    const newToDos = { ...toDos, [Date.now()]: { text, work: working } };
+    const newToDos = {
+      ...toDos,
+      [Date.now()]: { text, work: working, done: false },
+    };
     setToDos(newToDos);
     await saveToDos(newToDos);
     setText("");
@@ -83,6 +86,12 @@ export default function App() {
     ]);
     return;
   };
+  const changeDone = (key) => {
+    const newToDos = {...toDos}
+    newToDos[key].done = !newToDos[key].done
+    setToDos(newToDos)
+    saveToDos(newToDos)
+  }
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -127,9 +136,16 @@ export default function App() {
           Object.keys(toDos).map((key) =>
             toDos[key].work === working ? (
               <View style={styles.toDo} key={key}>
-                <Text style={styles.toDoText}>{toDos[key].text}</Text>
-                <TouchableOpacity onPress={() => deleteToDo(key)}>
-                  <Fontisto name="trash" size={18} color="white" />
+                <TouchableOpacity style={styles.done} onPress={() => changeDone(key)}>
+                  {toDos[key].done ? (
+                    <Fontisto name="checkbox-active" size={20} color="white" />
+                  ) : (
+                    <Fontisto name="checkbox-passive" size={20} color="white" />
+                  )}
+                </TouchableOpacity>
+                <Text style={dStyles(toDos[key].done).toDoText}>{toDos[key].text}</Text>
+                <TouchableOpacity style={styles.delete} onPress={() => deleteToDo(key)}>
+                  <Fontisto name="trash" size={20} color="white" />
                 </TouchableOpacity>
               </View>
             ) : null
@@ -173,13 +189,31 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderRadius: 15,
+    flex: 12,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "space-between"
+  },
+  done: {
+    flex: 2,
   },
   toDoText: {
     color: "white",
     fontSize: 16,
     fontWeight: "500",
+    flex: 8,
   },
+  delete: {
+    flex: 1,
+  }
 });
+
+const dStyles = (done) => StyleSheet.create({
+  toDoText: {
+    color: done ? theme.gray : "white",
+    textDecorationLine: done ? "line-through" : "none",
+    fontSize: 16,
+    fontWeight: "500",
+    flex: 10,
+  }
+})
