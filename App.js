@@ -56,10 +56,10 @@ export default function App() {
     setText("");
   };
   const deleteToDo = (key) => {
-    Alert.alert("Delete To Do", "Are you sure?", [
-      { text: "Cancel" },
+    Alert.alert("할 일을 삭제합니다.", "확실합니까?", [
+      { text: "취소" },
       {
-        text: "I'm Sure",
+        text: "네",
         onPress: () => {
           const newToDos = { ...toDos };
           delete newToDos[key];
@@ -100,7 +100,7 @@ export default function App() {
         onChangeText={onChangeText}
         returnKeyType="done"
         value={text}
-        placeholder={working ? "Add a To Do" : "Where do you want to go?"}
+        placeholder={working ? "할 일을 추가합니다." : "어디로 가고싶나요?"}
         style={styles.input}
       />
       <ScrollView>
