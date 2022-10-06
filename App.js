@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -19,6 +20,7 @@ export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     loadToDos();
   }, []);
@@ -40,6 +42,9 @@ export default function App() {
     } catch (e) {
       console.log(e);
     }
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
   };
   const addToDo = async () => {
     if (text === "") {
@@ -99,15 +104,23 @@ export default function App() {
         style={styles.input}
       />
       <ScrollView>
-        {Object.keys(toDos).map((key) =>
-          toDos[key].work === working ? (
-            <View style={styles.toDo} key={key}>
-              <Text style={styles.toDoText}>{toDos[key].text}</Text>
-              <TouchableOpacity onPress={() => deleteToDo(key)}>
-                <Fontisto name="trash" size={18} color="white" />
-              </TouchableOpacity>
-            </View>
-          ) : null
+        {loading ? (
+          <ActivityIndicator
+            style={styles.loading}
+            size="large"
+            color="white"
+          />
+        ) : (
+          Object.keys(toDos).map((key) =>
+            toDos[key].work === working ? (
+              <View style={styles.toDo} key={key}>
+                <Text style={styles.toDoText}>{toDos[key].text}</Text>
+                <TouchableOpacity onPress={() => deleteToDo(key)}>
+                  <Fontisto name="trash" size={18} color="white" />
+                </TouchableOpacity>
+              </View>
+            ) : null
+          )
         )}
       </ScrollView>
     </View>
@@ -137,6 +150,9 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     marginVertical: 20,
     fontSize: 18,
+  },
+  loading: {
+    marginTop: 200,
   },
   toDo: {
     backgroundColor: theme.toDoBg,
