@@ -190,7 +190,11 @@ export default function App() {
                       color={theme.white}
                     />
                   ) : (
-                    <FontAwesome name="square-o" size={20} color={theme.white} />
+                    <FontAwesome
+                      name="square-o"
+                      size={20}
+                      color={theme.white}
+                    />
                   )}
                 </TouchableOpacity>
                 <Text style={dStyles(toDos[key].done).toDoText}>
@@ -204,7 +208,11 @@ export default function App() {
                     setUpdateKey(key);
                   }}
                 >
-                  <FontAwesome name="pencil-square-o" size={20} color={theme.white} />
+                  <FontAwesome
+                    name="pencil-square-o"
+                    size={20}
+                    color={theme.white}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.delete}
