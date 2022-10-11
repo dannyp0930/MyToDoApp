@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Fontisto } from "@expo/vector-icons";
+import { FontAwesome } from '@expo/vector-icons';
 import { theme } from "./colors";
 
 const STORAGE_KEY = "@toDos";
@@ -138,14 +138,14 @@ export default function App() {
               <View style={styles.toDo} key={key}>
                 <TouchableOpacity style={styles.done} onPress={() => changeDone(key)}>
                   {toDos[key].done ? (
-                    <Fontisto name="checkbox-active" size={20} color="white" />
+                    <FontAwesome name="check-square-o" size={20} color="white" />
                   ) : (
-                    <Fontisto name="checkbox-passive" size={20} color="white" />
+                    <FontAwesome name="square-o" size={20} color="white" />
                   )}
                 </TouchableOpacity>
                 <Text style={dStyles(toDos[key].done).toDoText}>{toDos[key].text}</Text>
                 <TouchableOpacity style={styles.delete} onPress={() => deleteToDo(key)}>
-                  <Fontisto name="trash" size={20} color="white" />
+                <FontAwesome name="trash-o" size={20} color="white" />
                 </TouchableOpacity>
               </View>
             ) : null
