@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from "@expo/vector-icons";
 import { theme } from "./colors";
 
 const STORAGE_KEY = "@toDos";
@@ -20,8 +21,11 @@ const MODE = "@mode";
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
+  const [modalText, setModalText] = useState("");
+  const [updateKey, setUpdateKey] = useState(0);
   const [toDos, setToDos] = useState({});
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
   useEffect(() => {
     loadToDos();
   }, []);
@@ -71,6 +75,19 @@ export default function App() {
     await saveToDos(newToDos);
     setText("");
   };
+  const updateTodo = async () => {
+    if (modalText === "") {
+      return;
+    }
+    const newToDos = { ...toDos };
+    newToDos[updateKey].text = modalText;
+    setToDos(newToDos);
+    await saveToDos(newToDos);
+    setModalText("");
+    setUpdateKey(0);
+    setModalVisible(false);
+  };
+  const onChangeModalText = (payload) => setModalText(payload);
   const deleteToDo = (key) => {
     Alert.alert("할 일을 삭제합니다.", "확실합니까?", [
       { text: "취소" },
@@ -87,20 +104,46 @@ export default function App() {
     return;
   };
   const changeDone = (key) => {
-    const newToDos = {...toDos}
-    newToDos[key].done = !newToDos[key].done
-    setToDos(newToDos)
-    saveToDos(newToDos)
-  }
+    const newToDos = { ...toDos };
+    newToDos[key].done = !newToDos[key].done;
+    setToDos(newToDos);
+    saveToDos(newToDos);
+  };
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={modalStyles.centeredView}>
+          <View style={modalStyles.modalView}>
+            <TextInput
+              onSubmitEditing={updateTodo}
+              onChangeText={onChangeModalText}
+              returnKeyType="done"
+              value={modalText}
+              style={modalStyles.input}
+            />
+            <TouchableOpacity
+              style={modalStyles.button}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <Text style={modalStyles.textStyle}>취소</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <StatusBar style="auto" />
       <View style={styles.header}>
         <TouchableOpacity onPress={work}>
           <Text
             style={{
               ...styles.btnText,
-              color: working ? "white" : theme.gray,
+              color: working ? theme.white : theme.gray,
             }}
           >
             Work
@@ -110,7 +153,7 @@ export default function App() {
           <Text
             style={{
               ...styles.btnText,
-              color: !working ? "white" : theme.gray,
+              color: !working ? theme.white : theme.gray,
             }}
           >
             Travel
@@ -130,22 +173,44 @@ export default function App() {
           <ActivityIndicator
             style={styles.loading}
             size="large"
-            color="white"
+            color={theme.white}
           />
         ) : (
           Object.keys(toDos).map((key) =>
             toDos[key].work === working ? (
               <View style={styles.toDo} key={key}>
-                <TouchableOpacity style={styles.done} onPress={() => changeDone(key)}>
+                <TouchableOpacity
+                  style={styles.done}
+                  onPress={() => changeDone(key)}
+                >
                   {toDos[key].done ? (
-                    <FontAwesome name="check-square-o" size={20} color="white" />
+                    <FontAwesome
+                      name="check-square-o"
+                      size={20}
+                      color={theme.white}
+                    />
                   ) : (
-                    <FontAwesome name="square-o" size={20} color="white" />
+                    <FontAwesome name="square-o" size={20} color={theme.white} />
                   )}
                 </TouchableOpacity>
-                <Text style={dStyles(toDos[key].done).toDoText}>{toDos[key].text}</Text>
-                <TouchableOpacity style={styles.delete} onPress={() => deleteToDo(key)}>
-                <FontAwesome name="trash-o" size={20} color="white" />
+                <Text style={dStyles(toDos[key].done).toDoText}>
+                  {toDos[key].text}
+                </Text>
+                <TouchableOpacity
+                  style={styles.update}
+                  onPress={() => {
+                    setModalVisible(!modalVisible);
+                    setModalText(toDos[key].text);
+                    setUpdateKey(key);
+                  }}
+                >
+                  <FontAwesome name="pencil-square-o" size={20} color={theme.white} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.delete}
+                  onPress={() => deleteToDo(key)}
+                >
+                  <FontAwesome name="trash-o" size={20} color={theme.white} />
                 </TouchableOpacity>
               </View>
             ) : null
@@ -159,7 +224,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.bg,
+    backgroundColor: theme.black,
     paddingHorizontal: 20,
   },
   header: {
@@ -173,7 +238,7 @@ const styles = StyleSheet.create({
     color: theme.gray,
   },
   input: {
-    backgroundColor: "white",
+    backgroundColor: theme.white,
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 30,
@@ -184,7 +249,7 @@ const styles = StyleSheet.create({
     marginTop: 200,
   },
   toDo: {
-    backgroundColor: theme.toDoBg,
+    backgroundColor: theme.darkGray,
     marginBottom: 10,
     paddingVertical: 20,
     paddingHorizontal: 20,
@@ -192,28 +257,70 @@ const styles = StyleSheet.create({
     flex: 12,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   done: {
-    flex: 2,
+    flex: 1,
   },
   toDoText: {
-    color: "white",
+    color: theme.white,
     fontSize: 16,
     fontWeight: "500",
-    flex: 8,
+    flex: 9,
+  },
+  update: {
+    flex: 1,
+    alignItems: "flex-end",
   },
   delete: {
     flex: 1,
-  }
+    alignItems: "flex-end",
+  },
 });
 
-const dStyles = (done) => StyleSheet.create({
-  toDoText: {
-    color: done ? theme.gray : "white",
-    textDecorationLine: done ? "line-through" : "none",
-    fontSize: 16,
-    fontWeight: "500",
-    flex: 10,
-  }
-})
+const modalStyles = StyleSheet.create({
+  centeredView: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalView: {
+    flex: 0.8,
+    flexDirection: "row",
+    backgroundColor: theme.lighterGray,
+    borderRadius: 15,
+    padding: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  input: {
+    flex: 0.8,
+    marginVertical: 20,
+    paddingVertical: 5,
+    borderBottomColor: theme.black,
+    borderBottomWidth: 1,
+    fontSize: 18,
+  },
+  button: {
+    borderRadius: 20,
+    padding: 10,
+    backgroundColor: theme.gray,
+  },
+  textStyle: {
+    color: theme.white,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+});
+
+const dStyles = (done) =>
+  StyleSheet.create({
+    toDoText: {
+      color: done ? theme.gray : theme.white,
+      textDecorationLine: done ? "line-through" : "none",
+      fontSize: 16,
+      fontWeight: "500",
+      flex: 10,
+    },
+  });
